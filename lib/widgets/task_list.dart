@@ -4,13 +4,14 @@ import 'task_item.dart';
 
 class TaskList extends StatelessWidget {
   final List<Task> tasks;
-  final Function(Task) toggleTask;
-  final Function(Task) deleteTask;
+  final Function(int) deleteTask;
+  final Function(Task) updateTask;
 
-  const TaskList(
-      {super.key, required this.tasks,
-      required this.toggleTask,
-      required this.deleteTask});
+  TaskList({
+    required this.tasks,
+    required this.deleteTask,
+    required this.updateTask,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +20,8 @@ class TaskList extends StatelessWidget {
       itemBuilder: (context, index) {
         return TaskItem(
           task: tasks[index],
-          toggleTask: toggleTask,
           deleteTask: deleteTask,
+          updateTask: updateTask,
         );
       },
     );

@@ -2,57 +2,68 @@ import 'package:flutter/material.dart';
 import '../models/task.dart';
 import '../widgets/task_list.dart';
 import 'add_task_screen.dart';
+import '../database/database_helper.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late DatabaseHelper _dbHelper;
   List<Task> tasks = [];
 
-  void addTask(String taskTitle) {
+  @override
+  void initState() {
+    super.initState();
+    _dbHelper = DatabaseHelper.instance;
+    _loadTasks();
+  }
+
+  void _loadTasks() async {
+    List<Task> loadedTasks = await _dbHelper.getTasks();
     setState(() {
-      tasks.add(Task(title: taskTitle));
+      tasks = loadedTasks;
     });
   }
 
-  void toggleTask(Task task) {
-    setState(() {
-      task.toggleDone();
-    });
+  void _addTask(Task task) async {
+    await _dbHelper.insertTask(task);
+    _loadTasks();
   }
 
-  void deleteTask(Task task) {
-    setState(() {
-      tasks.remove(task);
-    });
+  void _deleteTask(int id) async {
+    await _dbHelper.deleteTask(id);
+    _loadTasks();
+  }
+
+  void _updateTask(Task task) async {
+    await _dbHelper.updateTask(task);
+    _loadTasks();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('To-Do List'),
+        title: Text('Advanced To-Do List'),
       ),
       body: TaskList(
         tasks: tasks,
-        toggleTask: toggleTask,
-        deleteTask: deleteTask,
+        deleteTask: _deleteTask,
+        updateTask: _updateTask,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final newTaskTitle = await Navigator.push(
+          final newTask = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+            MaterialPageRoute(builder: (context) => AddTaskScreen()),
           );
-          if (newTaskTitle != null) {
-            addTask(newTaskTitle);
+          if (newTask != null) {
+            _addTask(newTask);
           }
         },
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

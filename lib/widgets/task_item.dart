@@ -1,33 +1,56 @@
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import '../screens/task_detail_screen.dart';
 
 class TaskItem extends StatelessWidget {
   final Task task;
-  final Function(Task) toggleTask;
-  final Function(Task) deleteTask;
+  final Function(int) deleteTask;
+  final Function(Task) updateTask;
 
-  const TaskItem(
-      {super.key, required this.task, required this.toggleTask, required this.deleteTask});
+  TaskItem({
+    required this.task,
+    required this.deleteTask,
+    required this.updateTask,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(
-        task.title,
-        style: TextStyle(
-          decoration: task.isDone ? TextDecoration.lineThrough : null,
+    return Card(
+      child: ListTile(
+        title: Text(
+          task.title,
+          style: TextStyle(
+            decoration: task.isDone ? TextDecoration.lineThrough : null,
+          ),
         ),
-      ),
-      leading: Checkbox(
-        value: task.isDone,
-        onChanged: (bool? value) {
-          toggleTask(task);
-        },
-      ),
-      trailing: IconButton(
-        icon: const Icon(Icons.delete),
-        onPressed: () {
-          deleteTask(task);
+        subtitle: Text(
+          'Due: ${task.dueDate.toLocal()}'.split(' ')[0],
+        ),
+        trailing: Checkbox(
+          value: task.isDone,
+          onChanged: (value) {
+            Task updatedTask = Task(
+              id: task.id,
+              title: task.title,
+              description: task.description,
+              dueDate: task.dueDate,
+              isDone: value!,
+              priority: task.priority,
+            );
+            updateTask(updatedTask);
+          },
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TaskDetailScreen(
+                task: task,
+                updateTask: updateTask,
+                deleteTask: deleteTask,
+              ),
+            ),
+          );
         },
       ),
     );
